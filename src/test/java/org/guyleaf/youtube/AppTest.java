@@ -1,4 +1,4 @@
-package org.guyleaf;
+package org.guyleaf.youtube;
 
 import static org.junit.Assert.assertTrue;
 
