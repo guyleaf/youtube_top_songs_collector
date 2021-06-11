@@ -1,1 +1,0 @@
-export HBASE_HOME=/hbase
