@@ -16,7 +16,7 @@ public class YouTubeCrawler {
         this.httpRequest = httpRequest;
     }
 
-    public String nextResponse() throws IOException {
+    public String execute() throws IOException {
         String response;
 
         HttpGet request = new HttpGet(this.httpRequest);

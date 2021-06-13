@@ -10,6 +10,7 @@ public class YouTubeVideoURLBuilder implements URLBuilder{
     private String pageToken;
     private String regionCode;
     private int categoryId;
+    private int maxResults;
 
     public static YouTubeVideoURLBuilder build(String baseURL, String key) {
         return new YouTubeVideoURLBuilder(baseURL, key);
@@ -23,6 +24,7 @@ public class YouTubeVideoURLBuilder implements URLBuilder{
         this.pageToken = "";
         this.regionCode = "";
         this.categoryId = 0;
+        this.maxResults = 5;
     }
 
     @Override
@@ -64,6 +66,12 @@ public class YouTubeVideoURLBuilder implements URLBuilder{
     }
 
     @Override
+    public URLBuilder setMaxResults(int maxResults) {
+        this.maxResults = maxResults;
+        return this;
+    }
+
+    @Override
     public String toString() {
         if (this.chart.isEmpty() || this.parts.isEmpty()) {
             throw new NullPointerException("Chart or Part parameter should not be empty.");
@@ -71,7 +79,8 @@ public class YouTubeVideoURLBuilder implements URLBuilder{
 
         String url = this.baseURL + "?" +
                 "part=" + this.parts + "&" +
-                "chart=" + this.chart + "&";
+                "chart=" + this.chart + "&" +
+                "maxResults=" + this.maxResults + "&";
 
         if (!this.pageToken.isEmpty()) {
             url += "pageToken=" + this.pageToken + "&";

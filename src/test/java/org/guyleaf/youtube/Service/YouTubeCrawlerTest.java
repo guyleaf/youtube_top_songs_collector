@@ -33,7 +33,7 @@ public class YouTubeCrawlerTest {
         YouTubeCrawler crawler = new YouTubeCrawler(httpRequest);
 
         try {
-            String response = crawler.nextResponse();
+            String response = crawler.execute();
             assertFalse(response.isEmpty());
             System.out.println(response);
         }
@@ -54,7 +54,7 @@ public class YouTubeCrawlerTest {
         YouTubeCrawler crawler = new YouTubeCrawler(httpRequest);
 
         try {
-            String response = crawler.nextResponse();
+            String response = crawler.execute();
             assertFalse(response.isEmpty());
             System.out.println(response);
         }

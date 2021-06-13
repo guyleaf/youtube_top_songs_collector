@@ -6,8 +6,18 @@
 
 package org.guyleaf.youtube.Database;
 
+import org.bson.conversions.Bson;
+
+import java.util.List;
+import java.util.function.Consumer;
+
 public interface DBConnector {
     void connect();
+    <T> void query(String collection, Consumer<T> consumer, Class<T> modelObject);
+    <T> void insertMany(String collection, List<T> data, Class<T> modelObject);
+    <T> void insertOne(String collection, T data, Class<T> modelObject);
+    <T> void upsertOne(String collection, T data, Class<T> modelObject);
+    <T> void upsertMany(String collection, Bson filter, List<T> data, Class<T> modelObject);
     void test();
     void close();
 }

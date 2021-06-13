@@ -22,5 +22,8 @@ public interface URLBuilder {
     default URLBuilder setCategoryId(int categoryId) throws NoSuchElementException {
         throw new NoSuchElementException("Undefined setCategoryId method.");
     }
+    default URLBuilder setMaxResults(int maxResults) throws NoSuchElementException {
+        throw new NoSuchElementException("Undefined setMaxResults method.");
+    }
     String toString();
 }

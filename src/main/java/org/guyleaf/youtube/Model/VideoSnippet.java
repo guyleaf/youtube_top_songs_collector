@@ -3,25 +3,23 @@ package org.guyleaf.youtube.Model;
 import java.io.Serializable;
 
 public class VideoSnippet implements Serializable {
-    private final String thumbnail;
+    private final Thumbnail thumbnail;
     private final String channelId;
     private final String channelTitle;
     private final String categoryId;
-    private final Integer viewCount;
-    private final Integer rank;
+    private final int viewCount;
     private final String duration;
 
-    public VideoSnippet(String thumbnail, String channelId, String channelTitle, String categoryId, Integer viewCount, Integer rank, String duration) {
+    public VideoSnippet(Thumbnail thumbnail, String channelId, String channelTitle, String categoryId, int viewCount, String duration) {
         this.thumbnail = thumbnail;
         this.channelId = channelId;
         this.channelTitle = channelTitle;
         this.categoryId = categoryId;
         this.viewCount = viewCount;
-        this.rank = rank;
         this.duration = duration;
     }
 
-    public String thumbnail() {
+    public Thumbnail thumbnail() {
         return this.thumbnail;
     }
 
@@ -37,12 +35,8 @@ public class VideoSnippet implements Serializable {
         return this.categoryId;
     }
 
-    public Integer viewCount() {
+    public int viewCount() {
         return this.viewCount;
-    }
-
-    public Integer rank() {
-        return this.rank;
     }
 
     public String duration() {
