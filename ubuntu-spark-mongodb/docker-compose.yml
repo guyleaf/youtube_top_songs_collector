@@ -8,6 +8,8 @@ services:
         - "7077:7077"
         environment:
         - INIT_DAEMON_STEP=setup_spark
+        volumes:
+            - ./test:/tmp
     spark-worker-1:
         image: bde2020/spark-worker:3.1.1-hadoop3.2
         container_name: spark-worker-1

@@ -126,9 +126,6 @@ public class CrawlingTask implements Runnable {
 
                 // End of json
                 if (object.isNull("nextPageToken")) {
-                    this.counter.set(0);
-                    this.currentHour = (this.currentHour + 1) % 25;
-                    this.currentHour = this.currentHour == 0 ? 1 : this.currentHour;
                     break;
                 }
                 token = object.getString("nextPageToken");
@@ -146,6 +143,17 @@ public class CrawlingTask implements Runnable {
             System.out.println("CategoryId: " + this.categoryId + ", error message: " + e.getMessage());
             System.out.println("CategoryId: " + this.categoryId + ", attempt request: " + counter.incrementAndGet() + " try.");
             this.scheduler.schedule(this, 1, TimeUnit.MINUTES);
+            Thread.currentThread().interrupt();
         }
+
+        // if finish a cycle, then do collecting task
+        if (this.currentHour == 24) {
+            this.scheduler.schedule(new CollectingTask(this.scheduler, this.categoryId, this.currentDate), 1, TimeUnit.SECONDS);
+        }
+
+        this.currentHour = (this.currentHour + 1) % 25;
+        this.currentHour = this.currentHour == 0 ? 1 : this.currentHour;
+        // reset failed counter
+        this.counter.set(0);
     }
 }

@@ -34,5 +34,8 @@ build/
 
 .env
 db/
+out/
+ubuntu-spark-mongodb/test/
+
 
 .DS_Store

@@ -34,7 +34,7 @@ public class MongoDB implements DBConnector {
         this.url = String.format("mongodb://%s:%s@%s:%s/?authSource=%s", user, password, host, port, database);
 
         Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
-        mongoLogger.setLevel(Level.WARNING); // e.g. or Log.WARNING, etc.
+        mongoLogger.setLevel(Level.ALL); // e.g. or Log.WARNING, etc.
     }
 
     private void ping() {

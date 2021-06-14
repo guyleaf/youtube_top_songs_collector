@@ -6,9 +6,9 @@
 
 package org.guyleaf.youtube;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +22,9 @@ import org.guyleaf.youtube.Database.MongoDB;
 import org.guyleaf.youtube.Model.Category;
 import org.guyleaf.youtube.Service.YouTubeVideoURLBuilder;
 import org.guyleaf.youtube.Task.CrawlingTask;
+
+import org.apache.spark.launcher.SparkAppHandle;
+import org.apache.spark.launcher.SparkLauncher;
 
 
 public class App 
@@ -52,15 +55,45 @@ public class App
         System.out.println("#####################################\tTask Init Complete\t#####################################");
     }
 
-    public static void main( String[] args )
-    {
-        setUp();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("#####################################\tTask Shutdown\t#####################################");
-            scheduledThreadPool.shutdown();
-            db.close();
-            System.out.println("service shutdown successfully.");
-            System.out.println("Exited!");
-        }));
+    public static void main( String[] args ) throws IOException, InterruptedException {
+//        setUp();
+//        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+//            System.out.println("#####################################\tTask Shutdown\t#####################################");
+//            scheduledThreadPool.shutdown();
+//            db.close();
+//            System.out.println("service shutdown successfully.");
+//            System.out.println("Exited!");
+//        }));
+        Map<String, String> env = new HashMap<>();
+        env.put("SPARK_URL", "spark://spark-master:7077");
+        env.put("DB_INPUT_URI", String.format("mongodb://%s:%s@%s:%s/%s.hourlyRank?authSource=%s", file.get("USERNAME"), file.get("PASSWORD"), file.get("HOST"), file.get("PORT"), file.get("DATABASE"), file.get("DATABASE")));
+        env.put("DB_OUTPUT_URI", String.format("mongodb://%s:%s@%s:%s/%s.dailyRank?authSource=%s", file.get("USERNAME"), file.get("PASSWORD"), file.get("HOST"), file.get("PORT"), file.get("DATABASE"), file.get("DATABASE")));
+        env.put("JAVA_HOME", "/usr/lib/jvm/default-jvm");
+
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        SparkAppHandle handle = new SparkLauncher(env)
+                .setSparkHome("/spark")
+                .setAppResource("/tmp/DailyRankSparkCollector.jar")
+                .setMainClass("org.guyleaf.dailyRankSparkCollector.App")
+                .setMaster("spark://spark-master:7077")
+                .setConf(SparkLauncher.DRIVER_MEMORY, "2g")
+                .setConf(SparkLauncher.EXECUTOR_MEMORY, "1g")
+                .startApplication(new SparkAppHandle.Listener() {
+                    //這裡監聽任務狀態，當任務結束時（不管是什麼原因結束）,isFinal（）方法會返回true,否則返回false
+                    @Override
+                    public void stateChanged(SparkAppHandle sparkAppHandle) {
+                        if (sparkAppHandle.getState().isFinal()) {
+                            countDownLatch.countDown();
+                        }
+                        System.out.println("state:" + sparkAppHandle.getState().toString());
+                    }
+
+
+                    @Override
+                    public void infoChanged(SparkAppHandle sparkAppHandle) {
+                        System.out.println("Info:" + sparkAppHandle.getState().toString());
+                    }
+                });
+        countDownLatch.await();
     }
 }
