@@ -19,7 +19,7 @@ public interface URLBuilder {
     default URLBuilder setPageToken(String pageToken) throws NoSuchElementException {
         throw new NoSuchElementException("Undefined setPageToken method.");
     }
-    default URLBuilder setCategoryId(int categoryId) throws NoSuchElementException {
+    default URLBuilder setCategoryId(String categoryId) throws NoSuchElementException {
         throw new NoSuchElementException("Undefined setCategoryId method.");
     }
     default URLBuilder setMaxResults(int maxResults) throws NoSuchElementException {

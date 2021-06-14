@@ -6,23 +6,23 @@
 
 package org.guyleaf.youtube.Model;
 
-import java.io.Serializable;
+import org.bson.Document;
 
-public class Video implements Serializable {
-    private final String videoId;
+public class Video {
+    private final String id;
     private final String title;
     private final String description;
     private final VideoSnippet videoSnippet;
 
-    public Video(String videoId, String title, String description, VideoSnippet videoSnippet) {
-        this.videoId = videoId;
+    public Video(String id, String title, String description, VideoSnippet videoSnippet) {
+        this.id = id;
         this.title = title;
         this.description = description;
         this.videoSnippet = videoSnippet;
     }
 
-    public String videoId() {
-        return this.videoId;
+    public String id() {
+        return this.id;
     }
 
     public String title() {
@@ -35,5 +35,12 @@ public class Video implements Serializable {
 
     public VideoSnippet snippet() {
         return this.videoSnippet;
+    }
+
+    public Document toDocument() {
+        return new Document("id", this.id)
+                .append("title", this.title)
+                .append("description", this.description)
+                .append("snippet", this.videoSnippet.toDocument());
     }
 }

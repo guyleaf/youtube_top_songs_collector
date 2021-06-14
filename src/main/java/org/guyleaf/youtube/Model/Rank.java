@@ -1,19 +1,20 @@
 package org.guyleaf.youtube.Model;
 
-import java.io.Serializable;
+import org.bson.Document;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Rank {
-    private final int categoryId;
+    private final String categoryId;
     private final List<String> videoRanks;
 
-    public Rank(int categoryId) {
+    public Rank(String categoryId) {
         this.categoryId = categoryId;
         this.videoRanks = new ArrayList<>();
     }
 
-    public int categoryId() {
+    public String categoryId() {
         return this.categoryId;
     }
 
@@ -23,5 +24,9 @@ public abstract class Rank {
 
     public void add(String id) {
         this.videoRanks.add(id);
+    }
+
+    public Document toDocument() {
+        return new Document("categoryId", this.categoryId).append("videoRanks", this.videoRanks);
     }
 }

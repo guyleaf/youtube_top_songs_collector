@@ -6,18 +6,27 @@
 
 package org.guyleaf.youtube.Database;
 
-import org.bson.conversions.Bson;
+import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistry;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 public interface DBConnector {
     void connect();
-    <T> void query(String collection, Consumer<T> consumer, Class<T> modelObject);
-    <T> void insertMany(String collection, List<T> data, Class<T> modelObject);
-    <T> void insertOne(String collection, T data, Class<T> modelObject);
-    <T> void upsertOne(String collection, T data, Class<T> modelObject);
-    <T> void upsertMany(String collection, Bson filter, List<T> data, Class<T> modelObject);
+    void query(String collection, Consumer<Document> consumer);
+    void query(String collection, Document filter, Consumer<Document> consumer);
+    void insertMany(String collection, List<Document> data);
+    void insertOne(String collection, Document data);
+    void upsertOne(String collection, Document filter, Document data);
+
+    /**
+     * Upsert multiple document in different rule
+     * @param collection collection name
+     * @param filter A list of rules
+     * @param data A list of data
+     */
+    void bulkUpsert(String collection, List<Document> filter, List<Document> data);
     void test();
     void close();
 }

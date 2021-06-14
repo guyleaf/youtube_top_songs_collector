@@ -9,7 +9,7 @@ public class YouTubeVideoURLBuilder implements URLBuilder{
     private String chart;
     private String pageToken;
     private String regionCode;
-    private int categoryId;
+    private String categoryId;
     private int maxResults;
 
     public static YouTubeVideoURLBuilder build(String baseURL, String key) {
@@ -23,12 +23,12 @@ public class YouTubeVideoURLBuilder implements URLBuilder{
         this.chart = "";
         this.pageToken = "";
         this.regionCode = "";
-        this.categoryId = 0;
+        this.categoryId = "0";
         this.maxResults = 5;
     }
 
     @Override
-    public URLBuilder setParts(List<String> parts) {
+    public YouTubeVideoURLBuilder setParts(List<String> parts) {
         StringBuilder builder = new StringBuilder();
 
         for (String part: parts) {
@@ -42,31 +42,31 @@ public class YouTubeVideoURLBuilder implements URLBuilder{
     }
 
     @Override
-    public URLBuilder setChart(String chart) {
+    public YouTubeVideoURLBuilder setChart(String chart) {
         this.chart = chart;
         return this;
     }
 
     @Override
-    public URLBuilder setPageToken(String pageToken) {
+    public YouTubeVideoURLBuilder setPageToken(String pageToken) {
         this.pageToken = pageToken;
         return this;
     }
 
     @Override
-    public URLBuilder setRegionCode(String regionCode) {
+    public YouTubeVideoURLBuilder setRegionCode(String regionCode) {
         this.regionCode = regionCode;
         return this;
     }
 
     @Override
-    public URLBuilder setCategoryId(int categoryId) {
+    public YouTubeVideoURLBuilder setCategoryId(String categoryId) {
         this.categoryId = categoryId;
         return this;
     }
 
     @Override
-    public URLBuilder setMaxResults(int maxResults) {
+    public YouTubeVideoURLBuilder setMaxResults(int maxResults) {
         this.maxResults = maxResults;
         return this;
     }
@@ -90,7 +90,7 @@ public class YouTubeVideoURLBuilder implements URLBuilder{
             url += "regionCode=" + this.regionCode + "&";
         }
 
-        url += "categoryId=" + this.categoryId + "&" + "key=" + this.key;
+        url += "videoCategoryId=" + this.categoryId + "&" + "key=" + this.key;
 
         return url;
     }

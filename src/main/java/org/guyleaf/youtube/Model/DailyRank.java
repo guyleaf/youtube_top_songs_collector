@@ -1,17 +1,21 @@
 package org.guyleaf.youtube.Model;
 
-import java.io.Serializable;
-import java.util.Date;
+import org.bson.Document;
 
-public class DailyRank extends Rank implements Serializable {
-    private final Date collectedDate;
+public class DailyRank extends Rank {
+    private final String collectedDate;
 
-    public DailyRank(int categoryId, Date date) {
+    public DailyRank(String categoryId, String date) {
         super(categoryId);
         this.collectedDate = date;
     }
 
-    public Date collectedDate() {
+    public String collectedDate() {
         return this.collectedDate;
+    }
+
+    @Override
+    public Document toDocument() {
+        return super.toDocument().append("collectedDate", this.collectedDate);
     }
 }

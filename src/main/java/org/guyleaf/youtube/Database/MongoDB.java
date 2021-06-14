@@ -6,6 +6,8 @@
 
 package org.guyleaf.youtube.Database;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -16,9 +18,9 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOneModel;
-import org.bson.BasicBSONObject;
+import com.mongodb.client.model.UpdateOptions;
+
 import org.bson.Document;
-import org.bson.conversions.Bson;
 
 public class MongoDB implements DBConnector {
     private MongoClient client;
@@ -32,7 +34,7 @@ public class MongoDB implements DBConnector {
         this.url = String.format("mongodb://%s:%s@%s:%s/?authSource=%s", user, password, host, port, database);
 
         Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
-        mongoLogger.setLevel(Level.INFO); // e.g. or Log.WARNING, etc.
+        mongoLogger.setLevel(Level.WARNING); // e.g. or Log.WARNING, etc.
     }
 
     private void ping() {
@@ -54,36 +56,61 @@ public class MongoDB implements DBConnector {
     }
 
     @Override
-    public <T> void query(String collection, Consumer<T> consumer, Class<T> modelObject) {
+    public void query(String collection, Consumer<Document> consumer) {
         this.checkConnection();
-        MongoCollection<T> tmp = this.db.getCollection(collection, modelObject);
+        MongoCollection<Document> tmp = this.db.getCollection(collection);
         tmp.find().forEach(consumer);
     }
 
     @Override
-    public <T> void insertMany(String collection, List<T> data, Class<T> modelObject) {
+    public void query(String collection, Document filter, Consumer<Document> consumer) {
         this.checkConnection();
-        MongoCollection<T> tmp = this.db.getCollection(collection, modelObject);
+        MongoCollection<Document> tmp = this.db.getCollection(collection);
+        tmp.find(filter).forEach(consumer);
+    }
+
+    @Override
+    public void insertMany(String collection, List<Document> data) {
+        this.checkConnection();
+        MongoCollection<Document> tmp = this.db.getCollection(collection);
         tmp.insertMany(data);
     }
 
     @Override
-    public <T> void insertOne(String collection, T data, Class<T> modelObject) {
+    public void insertOne(String collection, Document data) {
         this.checkConnection();
-        MongoCollection<T> tmp = this.db.getCollection(collection, modelObject);
+        MongoCollection<Document> tmp = this.db.getCollection(collection);
         tmp.insertOne(data);
     }
 
+    /**
+     * Upsert multiple document in different rule
+     * @param collection collection name
+     * @param filter A list of rules
+     * @param data A list of data
+     */
     @Override
-    public <T> void upsertMany(String collection, Bson filter, List<T> data, Class<T> modelObject) {
+    public void bulkUpsert(String collection, List<Document> filter, List<Document> data) {
         this.checkConnection();
-        MongoCollection<Document> tmp = this.db.getCollection(collection);
 
+        List<UpdateOneModel<Document>> docs = new ArrayList<>();
+        Iterator<Document> filter_iter = filter.iterator();
+        Iterator<Document> data_iter = data.iterator();
+
+        while (filter_iter.hasNext() && data_iter.hasNext()) {
+            docs.add(new UpdateOneModel<>(filter_iter.next(), new Document("$setOnInsert",  data_iter.next()), new UpdateOptions().upsert(true)));
+        }
+
+        MongoCollection<Document> tmp = this.db.getCollection(collection);
+        tmp.bulkWrite(docs);
     }
 
     @Override
-    public <T> void upsertOne(String collection, T data, Class<T> modelObject) {
-
+    public void upsertOne(String collection, Document filter, Document data) {
+        this.checkConnection();
+        data = new Document("$setOnInsert", data);
+        MongoCollection<Document> tmp = this.db.getCollection(collection);
+        tmp.updateOne(filter, data, new UpdateOptions().upsert(true));
     }
 
     @Override

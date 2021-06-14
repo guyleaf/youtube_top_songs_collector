@@ -1,13 +1,12 @@
 package org.guyleaf.youtube.Model;
 
-import java.io.Serializable;
-import java.util.Date;
+import org.bson.Document;
 
-public class HourlyRank extends Rank implements Serializable {
+public class HourlyRank extends Rank {
     private final int collectedHour;
     private final String collectedDate;
 
-    public HourlyRank(int categoryId, int hour, String date) {
+    public HourlyRank(String categoryId, int hour, String date) {
         super(categoryId);
         this.collectedHour = hour;
         this.collectedDate = date;
@@ -19,5 +18,10 @@ public class HourlyRank extends Rank implements Serializable {
 
     public String collectedDate() {
         return this.collectedDate;
+    }
+
+    @Override
+    public Document toDocument() {
+        return super.toDocument().append("collectedDate", this.collectedDate).append("collectedHour", this.collectedHour);
     }
 }

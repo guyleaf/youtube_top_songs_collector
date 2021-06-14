@@ -1,19 +1,27 @@
 package org.guyleaf.youtube.Model;
 
-public class Category {
-    private final int id;
-    private final String name;
+import org.bson.Document;
 
-    public Category(int id, String name) {
+public final class Category {
+    private String id;
+    private String title;
+
+    public Category() { }
+
+    public Category(String id, String title) {
         this.id = id;
-        this.name = name;
+        this.title = title;
     }
 
-    public int id() {
+    public String id() {
         return this.id;
     }
 
-    public String name() {
-        return this.name;
+    public String title() {
+        return this.title;
+    }
+
+    public Document toDocument() {
+        return new Document("id", this.id).append("title", this.title);
     }
 }

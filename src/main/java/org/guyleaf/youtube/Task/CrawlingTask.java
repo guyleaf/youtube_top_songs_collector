@@ -1,12 +1,13 @@
 package org.guyleaf.youtube.Task;
 
+import org.bson.Document;
 import org.guyleaf.youtube.Database.DBConnector;
 import org.guyleaf.youtube.Model.HourlyRank;
 import org.guyleaf.youtube.Model.Thumbnail;
 import org.guyleaf.youtube.Model.Video;
 import org.guyleaf.youtube.Model.VideoSnippet;
+import org.guyleaf.youtube.Service.URLBuilder;
 import org.guyleaf.youtube.Service.YouTubeCrawler;
-import org.guyleaf.youtube.Service.YouTubeVideoURLBuilder;
 
 import java.text.SimpleDateFormat;
 
@@ -25,26 +26,22 @@ import org.json.JSONObject;
 
 public class CrawlingTask implements Runnable {
     private final ScheduledExecutorService scheduler;
-    private final YouTubeVideoURLBuilder youTubeVideoURLBuilder;
-    private final int categoryId;
-    private final String collectionName;
+    private final URLBuilder youTubeVideoURLBuilder;
+    private final String categoryId;
     private final DBConnector db;
-    private final int maxResults;
     private final int MAX_RETRY = 5;
 
     private final AtomicInteger counter;
     private int currentHour;
     private Date currentDate;
 
-    public CrawlingTask(ScheduledExecutorService scheduler, DBConnector db, YouTubeVideoURLBuilder youTubeVideoURLBuilder, int categoryId, String collectionName, int maxResults) {
+    public CrawlingTask(ScheduledExecutorService scheduler, DBConnector db, URLBuilder youTubeVideoURLBuilder, String categoryId) {
         this.youTubeVideoURLBuilder = youTubeVideoURLBuilder;
         this.categoryId = categoryId;
         this.db = db;
-        this.collectionName = collectionName;
-        this.maxResults = maxResults;
         this.scheduler = scheduler;
         this.counter = new AtomicInteger(0);
-        this.currentHour = 0; // 1:00-24:00 as a cycle
+        this.currentHour = 1; // 1:00-24:00 as a cycle
     }
 
     private List<String> processRank(JSONArray object) {
@@ -80,14 +77,25 @@ public class CrawlingTask implements Runnable {
         String channelId = snippet.getString("channelId");
         String channelTitle = snippet.getString("channelTitle");
         String categoryId = snippet.getString("categoryId");
-        int viewCount = object.getJSONObject("statistics").getInt("viewCount");
+        String viewCount = object.getJSONObject("statistics").optString("viewCount");
         String duration = object.getJSONObject("contentDetails").getString("duration");
         return new VideoSnippet(thumbnail, channelId, channelTitle, categoryId, viewCount, duration);
     }
 
     private void save(HourlyRank rank, List<Video> videos) {
-        // TODO: SAVE
-        // this.db.insert(this.collectionName, videos, Video.class);
+        Document filter = new Document("categoryId", rank.categoryId())
+                .append("collectedHour", rank.collectedHour())
+                .append("collectedDate", rank.collectedDate());
+        this.db.upsertOne("hourlyRank", filter, rank.toDocument());
+
+        List<Document> filters = new ArrayList<>();
+        List<Document> data = new ArrayList<>();
+
+        for (Video video: videos) {
+            data.add(video.toDocument());
+            filters.add(new Document("id", video.id()));
+        }
+        this.db.bulkUpsert("video", filters, data);
     }
 
     @Override
@@ -97,12 +105,14 @@ public class CrawlingTask implements Runnable {
             HourlyRank rank;
             List<Video> videos = new ArrayList<>();
 
-            if (this.currentHour == 0) {
+            if (this.currentHour == 1) {
                 this.currentDate = Calendar.getInstance(TimeZone.getTimeZone("Asia/Taipei")).getTime();
             }
 
             SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
             rank = new HourlyRank(this.categoryId, this.currentHour, formatter.format(this.currentDate));
+
+            System.out.printf("CategoryId: %s, hour: %d, date: %s\n", this.categoryId, rank.collectedHour(), rank.collectedDate());
 
             // 50 queries per request
             while (true) {
@@ -117,23 +127,25 @@ public class CrawlingTask implements Runnable {
                 // End of json
                 if (object.isNull("nextPageToken")) {
                     this.counter.set(0);
-                    this.currentHour = (this.currentHour + 1) % 24;
+                    this.currentHour = (this.currentHour + 1) % 25;
+                    this.currentHour = this.currentHour == 0 ? 1 : this.currentHour;
                     break;
                 }
                 token = object.getString("nextPageToken");
+
+                Thread.sleep(1000);
             }
 
             this.save(rank, videos);
         }
+        catch (InterruptedException e) {
+            System.out.println("CategoryId: " + this.categoryId + ", receive interrupt signal!");
+            Thread.currentThread().interrupt();
+        }
         catch (Exception e) {
-            System.out.println("Error message: " + e.getMessage());
-            if (this.counter.get() < MAX_RETRY) {
-                System.out.println("Attempt request: " + counter.getAndIncrement() + " failed.");
-                this.scheduler.schedule(this, 1, TimeUnit.MINUTES);
-            }
-            else {
-                this.scheduler.shutdown();
-            }
+            System.out.println("CategoryId: " + this.categoryId + ", error message: " + e.getMessage());
+            System.out.println("CategoryId: " + this.categoryId + ", attempt request: " + counter.incrementAndGet() + " try.");
+            this.scheduler.schedule(this, 1, TimeUnit.MINUTES);
         }
     }
 }

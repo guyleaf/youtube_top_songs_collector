@@ -1,16 +1,16 @@
 package org.guyleaf.youtube.Model;
 
-import java.io.Serializable;
+import org.bson.Document;
 
-public class VideoSnippet implements Serializable {
+public class VideoSnippet {
     private final Thumbnail thumbnail;
     private final String channelId;
     private final String channelTitle;
     private final String categoryId;
-    private final int viewCount;
+    private final String viewCount;
     private final String duration;
 
-    public VideoSnippet(Thumbnail thumbnail, String channelId, String channelTitle, String categoryId, int viewCount, String duration) {
+    public VideoSnippet(Thumbnail thumbnail, String channelId, String channelTitle, String categoryId, String viewCount, String duration) {
         this.thumbnail = thumbnail;
         this.channelId = channelId;
         this.channelTitle = channelTitle;
@@ -35,11 +35,20 @@ public class VideoSnippet implements Serializable {
         return this.categoryId;
     }
 
-    public int viewCount() {
+    public String viewCount() {
         return this.viewCount;
     }
 
     public String duration() {
         return this.duration;
+    }
+
+    public Document toDocument() {
+        return new Document("channelId", this.channelId)
+                .append("channelTitle", this.channelTitle)
+                .append("categoryId", this.categoryId)
+                .append("thumbnail", this.thumbnail.toDocument())
+                .append("viewCount", this.viewCount)
+                .append("duration", this.duration);
     }
 }

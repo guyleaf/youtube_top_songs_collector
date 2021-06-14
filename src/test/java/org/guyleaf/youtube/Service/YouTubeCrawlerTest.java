@@ -48,7 +48,7 @@ public class YouTubeCrawlerTest {
                 .setParts(new ArrayList<>(Arrays.asList("id", "snippet", "contentDetails", "statistics")))
                 .setChart("mostPopular")
                 .setRegionCode("TW")
-                .setCategoryId(0)
+                .setCategoryId("0")
                 .toString();
 
         YouTubeCrawler crawler = new YouTubeCrawler(httpRequest);
