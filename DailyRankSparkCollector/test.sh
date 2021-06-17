@@ -1,0 +1,2 @@
+docker cp target/DailyRankSparkCollector-1.0-SNAPSHOT-jar-with-dependencies.jar spark-master:/tmp
+docker exec -it spark-master /spark/bin/spark-submit --class org.guyleaf.dailyRankSparkCollector.App --master spark://spark-master:7077 /tmp/DailyRankSparkCollector-1.0-SNAPSHOT-jar-with-dependencies.jar "$1" "$2"

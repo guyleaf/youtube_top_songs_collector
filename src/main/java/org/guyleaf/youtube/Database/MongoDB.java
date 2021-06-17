@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoClient;
@@ -20,6 +18,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 
+import org.apache.log4j.*;
 import org.bson.Document;
 
 public class MongoDB implements DBConnector {
@@ -34,7 +33,9 @@ public class MongoDB implements DBConnector {
         this.url = String.format("mongodb://%s:%s@%s:%s/?authSource=%s", user, password, host, port, database);
 
         Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
-        mongoLogger.setLevel(Level.ALL); // e.g. or Log.WARNING, etc.
+        mongoLogger.addAppender(new ConsoleAppender(
+                new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN)));
+        mongoLogger.setLevel(Level.INFO); // e.g. or Log.WARNING, etc.
     }
 
     private void ping() {

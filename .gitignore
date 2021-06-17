@@ -35,7 +35,7 @@ build/
 .env
 db/
 out/
-ubuntu-spark-mongodb/test/
+docker/crawling-service/post_process/
 
 
 .DS_Store

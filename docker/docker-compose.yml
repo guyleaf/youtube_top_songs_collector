@@ -8,8 +8,9 @@ services:
         - "7077:7077"
         environment:
         - INIT_DAEMON_STEP=setup_spark
+        - TZ=Asia/Taipei
         volumes:
-            - ./test:/tmp
+            - ./test:/test
     spark-worker-1:
         image: bde2020/spark-worker:3.1.1-hadoop3.2
         container_name: spark-worker-1
@@ -18,7 +19,10 @@ services:
         ports:
         - "8081:8081"
         environment:
-        - "SPARK_MASTER=spark://spark-master:7077"
+            SPARK_MASTER: spark://spark-master:7077
+            SPARK_WORKER_MEMORY: ${SPARK_WORKER_MEMORY}
+            SPARK_WORKER_CORES: 2
+            TZ: "Asia/Taipei"
     spark-worker-2:
         image: bde2020/spark-worker:3.1.1-hadoop3.2
         container_name: spark-worker-2
@@ -27,7 +31,10 @@ services:
         ports:
         - "8082:8081"
         environment:
-        - "SPARK_MASTER=spark://spark-master:7077"
+            SPARK_MASTER: spark://spark-master:7077
+            SPARK_WORKER_MEMORY: ${SPARK_WORKER_MEMORY}
+            SPARK_WORKER_CORES: 2
+            TZ: "Asia/Taipei"
     mongodb:
         image: mongo:latest
         container_name: mongodb
@@ -43,6 +50,7 @@ services:
             MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
             DB_USERNAME: ${DB_USERNAME}
             DB_PASSWORD: ${DB_PASSWORD}
+            TZ: "Asia/Taipei"
     mongodb-express:
         image: mongo-express:latest
         container_name: mongodb-express
@@ -57,3 +65,4 @@ services:
             ME_CONFIG_MONGODB_SERVER: ${ME_CONFIG_MONGODB_SERVER}
             ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME}
             ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD}
+            TZ: "Asia/Taipei"

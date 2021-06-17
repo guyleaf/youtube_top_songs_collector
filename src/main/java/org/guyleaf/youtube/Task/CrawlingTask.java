@@ -148,7 +148,8 @@ public class CrawlingTask implements Runnable {
 
         // if finish a cycle, then do collecting task
         if (this.currentHour == 24) {
-            this.scheduler.schedule(new CollectingTask(this.scheduler, this.categoryId, this.currentDate), 1, TimeUnit.SECONDS);
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+            this.scheduler.schedule(new CollectingTask(this.scheduler, this.categoryId, formatter.format(this.currentDate)), 1, TimeUnit.SECONDS);
         }
 
         this.currentHour = (this.currentHour + 1) % 25;
